@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-70si&)q_&fsp_o-wi+2a^muik^!&c4re2)7n0$(@tju@o5o1wj
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['142.93.218.105']
 
 
 # Application definition
@@ -79,13 +79,24 @@ WSGI_APPLICATION = 'ecommerce.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'ecommercedb',
+        'USER': 'ecommerce_admin',
+        'PASSWORD': 'testing123',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -129,9 +140,8 @@ MEDIA_URL='/media/'
 KEY_ID="rzp_test_iKr9ACakLV6NiG"
 KEY_SECRET="qprk2R1FtGGwZRfkx98o86DC"
 
-STATICFILES_DIRS=[
-    os.path.join(BASE_DIR,'static')
-]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_root')
 
 MEDIA_ROOT=os.path.join(BASE_DIR,'media')
 
