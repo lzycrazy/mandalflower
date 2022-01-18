@@ -1,0 +1,56 @@
+{% extends 'basse.html' %}
+
+{%block body%}
+
+
+<div class="container bg-white rounded-top mt-5" id="zero-pad">
+    <div class="row d-flex justify-content-center">
+        <div class="col-lg-10 col-12 pt-3">
+           
+            <div class="container" style="background-color: orange;" >
+            <div class="d-flex flex-row px-lg-5 mx-lg-5 mobile" id="heading" >
+                <div class="px-lg-5 mr-lg-5" id="produc" ><h3>PRODUCTS</h3></div>
+                <div class="px-lg-5 ml-lg-5" id="prc"><h3>PRICE</h3></div>
+                <div class="px-lg-5 ml-lg-1" id="quantity"><h3>QUANTITY</h3></div>
+                <div class="px-lg-5 ml-lg-3" id="total"><h3>TOTAL</h3></div>
+            </div>
+        </div>
+            {% for i in orderitem %}
+            <div class="d-flex flex-row justify-content-between align-items-center pt-lg-4 pt-2 pb-3 border-bottom mobile">
+                <div class="d-flex flex-row align-items-center">
+                    <div>
+                        <img src="{{i.image}}" style="height: 100px; width:200px"></div>
+                    <div class="d-flex flex-column pl-md-3 pl-1">
+                       
+                        
+                    </div>
+                </div>
+                <div class="pl-md-0 pl-1"><b>${{i.price}}</b></div>
+                <div class="pl-md-0 pl-1"><b>{{i.quantity}}</b></div>
+                <div class="pl-md-0 pl-1"><b>{{i.total}}</b></div>
+                
+                </div>
+            {%endfor%}
+            
+         
+        </div>
+    </div>
+</div>
+<div class="container bg-light rounded-bottom py-4" id="zero-pad">
+    <div class="row d-flex justify-content-center">
+        <div class="col-lg-10 col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <!-- <div><a href="/"> <button class="btn btn-success border border-dark">BACK</button></a> </div> -->
+                
+                <!-- <div class="px-md-0 px-1" id="footer-font" style="margin: 10px 0px 0px 300px;"> <b class="pl-md-4">Order Value - {{a.amount}}</div> -->
+                    <!-- <input type="text" name="amt" value="{{cart_total_amount}}"> -->
+                <div> 
+                   
+                    
+                    
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{%endblock%}

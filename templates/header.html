@@ -1,0 +1,171 @@
+{%load static%}
+{% load cart_tag %}
+<!doctype html>
+<html class="no-js" lang="zxx">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>MANDAL FLORIST</title>
+    <meta name="description" content="">
+    <meta name="robots" content="noindex, follow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/img/favicon.png' %}">
+
+    <!-- all css here -->
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/animate.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/owl.carousel.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/slick.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/simple-line-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/ionicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/meanmenu.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/responsive.css' %}">
+    <script src="{% static 'assets/js/vendor/modernizr-3.11.7.min.js' %}"></script>
+</head>
+
+<body>
+    
+    <!-- header start -->
+    <header class="header-area clearfix">
+        <div class="header-top">
+            <div class="container">
+                <div class="border-bottom-1">
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4 col-12">
+                            <div class="welcome-area">
+                                <p>Default welcome msg! </p>
+                            </div>
+                        </div>
+                        <div class="col-lg-8 col-md-8 col-12">
+                            <div class="account-curr-lang-wrap f-right">
+                                <ul>
+                                    <li class="top-hover"><a href="#">My Account <i class="ion-chevron-down"></i></a>
+                                        <ul>
+                                            {%if user.is_authenticated %}
+                                            <li>{{request.user}}</li>
+                                         <!-- class="mx-2 " style="color: black;">{{request.user}}</h3> -->
+                                        <!-- <a href="/handlelogout"><button class="btn nav_hover mx-1"><i class="fas fa-sign-out-alt"></i></button></a> -->
+                                            
+                                        <li><a href="/handlelogout">Logout</a></li>
+                                        {%else%}
+                                            <li><a href="/handlelogin1">Login</a></li>
+                                        {%endif%}
+                                            <li><a href="/signup">Register</a></li>
+                                            <!-- <li><a href="my-account.html">my account</a></li> -->
+                                        </ul>
+                                    </li>
+                                   
+                                    
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="header-bottom transparent-bar">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-3 col-md-4 col-6">
+                        <div class="logo">
+                            <a href="index.html">
+                                    <img alt="" src="../static/images/mandal florist.png" style="height: 80px;">
+                                </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-9 col-md-8 col-6">
+                        <div class="header-bottom-right">
+                            <div class="main-menu">
+                                <nav>
+                                    <ul>
+                                        <li class="top-hover"><a href="/">home</a>
+                                           
+                                        </li>
+                                        <li><a href="/about">about</a></li>
+        
+                                        <li class="top-hover">SHOP
+                                            <ul class="submenu">
+                                                {%for cat in category%}
+                                                <li><a href="/category={{cat.slug}}">{{cat.name}}</a></li>
+                                                {%endfor%}
+                                             </ul>
+                                        </li>
+                                        <li><a href="/contact">contact</a></li>
+                                       
+                                        
+                                       
+                                    </ul>
+                                </nav>
+                            </div>
+        
+                            {%if user.is_authenticated%}
+                          
+                            <div class="header-cart">
+        
+                                <a href="/cart/cart-detail/">
+                                    <div class="cart-icon">
+                                        <i class="ion-bag"></i>
+                                        <span class="count-style">{{request.session.cart|length}}</span>
+                                    </div>
+                                    <div class="cart-text">
+                                        <span class="digit">My Cart</span>
+                                        
+                                    </div>
+                                </a>
+                               
+                                
+                                <div class="shopping-cart-content">
+                                    <ul>
+                                        {% for key,value in request.session.cart.items %}
+                                        <li class="single-shopping-cart">
+                                            <div class="shopping-cart-img">
+                                                <a href="#"><img alt="" src="{{value.image}}" style="height: 50px;width:100px;" ></a>
+                                            </div>
+                                            <div class="shopping-cart-title">
+                                                <h4><a href="#">Phantom Remote </a></h4>
+                                                <h6>Qty: {{value.quantity}}</h6>
+                                                <span>${{value.price}}</span>
+                                            </div>
+                                            <div class="shopping-cart-delete">
+                                                <a href="{% url 'item_clear' value.product_id %}"><i class="ion ion-close"></i></a>
+                                            </div>
+                                        </li>
+                                        {%endfor%}
+                                       
+                                    </ul>
+                                    
+                                    <div class="shopping-cart-total">
+                                       
+                                        <h4>Total : <span class="shop-total">{{cart_total_amount}}</span></h4>
+                                    </div> 
+                                    <div class="shopping-cart-btn">
+                                        <a href="/cart/cart-detail/">view cart</a>
+                                        <!-- <a href="/checkout">checkout</a> -->
+                                    </div>
+                                </div>
+                               
+        
+        
+                            </div>
+                            {%else%}
+                            <a href="/handlelogin1">
+                                <div class="cart-icon">
+                                    <i class="ion-bag"></i>
+                                    <span class="count-style">{{request.session.cart|length}}</span>
+                                </div>
+                                <div class="cart-text">
+                                    <span class="digit">My Cart</span>
+                                    
+                                </div>
+                            </a>
+                           
+        
+                            {%endif%}
+        
+                        </div>
+                    </div>
+                </div>

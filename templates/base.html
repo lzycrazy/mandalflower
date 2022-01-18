@@ -1,0 +1,422 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <!-- basic -->
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- mobile metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+  <!-- site metas -->
+  <title>MANDAL FLORIST</title>
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <!-- bootstrap css -->
+  <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+  <!-- style css -->
+  <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+  <!-- Responsive-->
+  <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+  <!-- fevicon -->
+  <link rel="icon" href="{% static 'images/fevicon.png' %}" type="image/gif" />
+  <!-- Scrollbar Custom CSS -->
+  <link rel="stylesheet" href="{% static 'css/jquery.mCustomScrollbar.min.css' %}">
+  <!-- Tweaks for older IEs-->
+  <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+  <!-- fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Poppins:400,700&display=swap" rel="stylesheet">
+  <!-- font awesome -->
+  
+  <!-- owl stylesheets -->
+  <link href="https://fonts.googleapis.com/css?family=Great+Vibes|Poppins:400,700&display=swap&subset=latin-ext"
+    rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
+  <link rel="stylesoeet" href="{% static 'css/owl.theme.default.min.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css"
+    media="screen">
+<style>
+
+
+   
+    footer{background:#eea5b8!important;  padding:40px 2px; width: 100%;}
+    .heading h3::after{content: ""; margin: auto; display:block; height:3px; width:240px; margin-top:10px; background-color:#eea5b8}
+    .first h3::after{content: ""; margin: auto; display:block; height:3px; width:275px; margin-top:10px; background-color: #eea5b8}
+    footer h4::after{content: "";  display:block; height:3px; width:100px; margin-top:10px; background-color: #eea5b8}
+    footer h4{color:black;  font-size:23px!important;}
+     
+    
+  .whatsapp_float{
+    position: fixed;
+    bottom: 40px;
+    right: 20px;
+  }
+
+   nav a,
+  .nav_hover{font-weight:530;
+     FONT-SIZE:14PX;}
+
+  nav
+  {padding:15px 0px!important; background-color: #fff;}
+  nav a,
+  .nav_hover{
+     padding-left:15px!important;
+     padding-right:15px!important; 
+     color:black!important;
+     }
+  
+  nav li a:hover,
+ .nav_hover:hover{
+    color: #fff !important;;
+    background-color: #dc3545;
+    /* background-color: #efefef; */
+    font-weight: 530;
+    FONT-SIZE:14PX;
+    border-radius: 0.25rem;
+    
+   
+  }
+  .active{color:#fff !important;
+  }
+  
+  
+</style>
+
+</head>
+
+<body>
+
+
+  <nav class="navbar  justify-content-between">
+    <a class="navbar-brand"><img src="{% static 'images/mandal florist.png' %}" style="height:60px;" alt=""></a>
+    <form action="/search" method="get" class="form-inline">
+      <input class="form-control mr-sm-2" type="search" placeholder="Search" name="query" aria-label="Search">
+      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+    
+    {%if user.is_authenticated%}
+    
+        <a href="/cart/cart-detail/"><i class="fas fa-3x fa-shopping-cart cart_margin" > 
+          <span class="position-absolute top-0 start-100 translate-middle p-2 bg-warning border border-light rounded-circle" style="margin: -15px -5px -13px -14px;
+          width: 27px;
+          height: 31px;">
+            <span class="visually-hidden"><h4>{{request.session.cart|length}}</h4></span>
+          </span>
+        
+      </i>
+    </a>
+  
+      {%else%}
+      <a href="/handlelogin1"><i class="fas fa-3x fa-shopping-cart" style="float: right;"> 
+        <span class="position-absolute top-0 start-100 translate-middle p-2 bg-warning border border-light rounded-circle" style="margin: -15px -5px -13px -14px;
+        width: 27px;
+        height: 31px;">
+          <span class="visually-hidden"><h4>{{request.session.cart|length}}</h4></span>
+        </span>
+      
+    </i></a>
+
+      {%endif%}
+</form>
+  </nav>
+  
+
+  <!-- end navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light"  >
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="btn nav_hover " href="/">MANDAL FLORIST</a>
+  
+    <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
+      <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+              
+        <li class="nav-item active">
+          <a class="nav-link mondal_hover " aria-current="page" href="/">FlowerShop</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link " href="/about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/contact">Contact</a>
+        </li>
+       
+
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" type="button"
+          id="dropdownMenuButton" data-toggle="dropdown"  >Category</a>
+          <div class="dropdown-menu" >
+
+            {%for cat in category%}
+
+            <a class="dropdown-item nav_hover" href="/category={{cat.slug}}">{{cat.name}}</a>
+
+            {%endfor%}
+
+          </div>
+        </li>
+        <!-- category -->
+       
+
+      </ul>
+      
+      <a href="/myorder"><button class="btn nav_hover mx-1">Order</button></a>
+  
+      <!-- <form class="form-inline my-2 my-lg-0"> -->
+        <!-- <a href="/admin"> <button class="btn nav_hover">Admin</button></a> -->
+        {%if user.is_authenticated %}
+        <h3 class="mx-2 " style="color: black;">{{request.user}} logged In</h3>
+        <a href="/handlelogout"><button class="btn nav_hover mx-1">Logout</button></a>
+  
+        {%else%}
+        <!-- <button type="button" class="btn  mx-1" data-toggle="modal" data-target="#loginModal">
+          Login
+        </button> -->
+        <a href="/handlelogin1"> <button class="btn nav_hover ">Login</button></a>
+  
+        <button type="button" class="btn nav_hover  mx-1" data-toggle="modal" data-target="#signupModal">
+          SignUp
+        </button>
+        {%endif%}
+      <!-- </form> -->
+    </div>
+  </nav>
+  
+  <!-- navbar -->
+  
+  
+  <!-- messages -->
+  {%for msg in messages%}
+  <div class="alert alert-{{msg.tags}} alert-dismissible fade show" role="alert">
+    <strong>Message : </strong> {{msg}}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  {%endfor%}
+
+
+
+  <!-- SignUp Mrodal -->
+  <div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModal" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title" id="signupModalTitle" style="text-align: center;">SignUp Here</h2>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="/signup" method='post'>
+            <div class="form-group">
+              <label for="username">Username</label>
+              <input type="text" class="form-control" id="username" name="username"
+                placeholder="Choose a unique username">
+            </div>
+            <div class="form-group">
+              <label for="fname">First Name</label>
+              <input type="text" class="form-control" id="fname" name="fname" placeholder="Enter Your First Name">
+            </div>
+            <div class="form-group">
+              <label for="lname">Last Name</label>
+              <input type="text" class="form-control" id="lname" name="lname" placeholder="Enter Your Last Name">
+            </div>
+            <div class="form-group">
+              <label for="email">Email address</label>
+              <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com">
+            </div>
+            <div class="form-group">
+              <label for="pass1">Choose a password</label>
+              <input type="password" class="form-control" id="pass1" name="pass1" placeholder="Choose Your Password">
+            </div>
+            <div class="form-group">
+              <label for="pass2">Confirm Password</label>
+              <input type="password" class="form-control" id="pass2" name="pass2"
+                placeholder="Enter your password again">
+            </div>
+
+
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+        </div>
+        <div class="modal-footer">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+  <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModal" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="loginModalTitle">Login Here</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- form -->
+          <form action="/handlelogin1" method="post">
+            <div class="form-group">
+              <label for="username">Username</label>
+              <input type="text" class="form-control" id="username" name="username"
+                placeholder="Choose a unique username">
+            </div>
+            <div class="form-group">
+              <label for="pass">Enter your password </label>
+              <input type="password" class="form-control" id="password" name="password"
+                placeholder="Enter your password ">
+            </div>
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+        </div>
+        <div class="modal-footer">
+        </div>
+      </div>
+    </div>
+  </div>
+
+ 
+  </div>
+
+  
+
+
+
+  
+
+  <!-- whatsapp -->
+  <div class="whatsapp_float">
+
+<a href=" https://wa.me/919811005027" target="_blank">    <img src="{% static 'images/whatsapp_icon.png' %}" width="100px" alt=""></a>
+    
+  </div>
+ 
+{%block body%} {%endblock%}
+
+<!-- footer -->
+
+
+
+<!-- footer section start -->
+<!-- <div class="footer_section layout_padding">
+   <div class="container">
+      <div class="footer_logo"><a href="index.html"><img src="{% static 'images/footer-logo.png' %}"></a></div>
+      <div class="input_bt">
+         <input type="text" class="mail_bt" placeholder="Your Email" name="Your Email">
+         <span class="subscribe_bt" id="basic-addon2"><a href="#">Subscribe</a></span>
+      </div>
+      <div class="footer_menu">
+         <ul>
+            <li><a href="#">Shop</a></li>
+            <li><a href="#">Gift Ideas</a></li>
+            <li><a href="#">New Releases</a></li>
+            <li><a href="#">Today's Deals</a></li>
+            <li><a href="#">Customer Service</a></li>
+         </ul>
+      </div>
+      <div class="location_main">Help Line Number : <a href="#">+1 1800 1200 1200</a></div>
+   </div>
+</div> -->
+<!-- footer section end -->
+<br>
+<br>
+<footer class="container-fluid " style="color: black;">
+   <div class="container">
+      <div class="row">
+          <div class="col-md-3 ">
+              <h4>About Us</h4>
+              <p  class=""><b>Specialist In: Artificial Flowers,Bouquet & Flower Basket, Wedding Decoration and Car Decoration, also Office and Showroom, Hotels and Restaurants Etc</b></p>
+             
+          </div>
+          
+        
+          
+       <div class="col-md-3" style="color:black;">
+       
+        <ul  class="p-2">
+          <h4>Services</h4>
+         <li >
+           <a class="" href="/">FlowristShop</a></li>
+          <li> <a  href="/about">About</a></li>
+         <li>  <a  href="/contact">Contact Us</a></li>
+    
+      </ul>
+    </div>
+
+
+
+    <div class="col-md-3  py-3" style="color:black;">
+       
+      <ul  class="p-2">
+        <h4>Contact</h4>
+        <a href="/contact"> <li >Contact  </li></a>
+        <a href="https://www.facebook.com/"><li >Facebook <i class="fab fa-facebook"></i> </li></a>
+        <a href="https://twitter.com/">  <li >Twitter <i class="fab fa-twitter"></i></li></a>
+        
+  
+    </ul>
+  </div>
+
+
+  <div class="col-md-3" style="color:black;">
+       
+    <ul  class="p-2">
+      <h4>Get In Touch</h4>
+      <p class="">B.P. Complex Sector-29, Near Police Chowki,Noida</p>
+      <p>Phone No. +01-9811623935,9170173935</p>
+      <p>mandalflowrist.com</p>
+
+  </ul>
+</div>
+
+         
+
+       </div>
+    </div>
+</footer>
+<!-- copyright section start -->
+<div class="copyright_section" >
+   <div class="container">
+      <p class="copyright_text">© 2021 All Rights Reserved. Design by lzycrazy </p>
+   </div>
+</div>
+<!-- copyright section end -->
+
+
+<!-- Javascript files-->
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/popper.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'js/jquery-3.0.0.min.js' %}"></script>
+<script src="{% static 'js/plugin.js' %}"></script>
+<!-- sidebar -->
+<script src="{% static 'js/jquery.mCustomScrollbar.concat.min.js' %}"></script>
+<script src="{% static 'js/custom.js' %}"></script>
+
+<!-- manual -->
+
+{%block js%} {%endblock%}
+<script>
+   function openNav() {
+      document.getElementById("mySidenav").style.width = "250px";
+   }
+
+   function closeNav() {
+      document.getElementById("mySidenav").style.width = "0";
+   }
+</script>
+
+</body>
+
+<!-- whatsapp -->
+
+
+
+</html>

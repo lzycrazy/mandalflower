@@ -1,0 +1,50 @@
+{% include 'header.html' %}
+
+
+
+<!-- SignUp Mrodal -->
+<div class="container my-3">
+    <h3>Signup</h3>
+
+
+    <form action="/signup" method='post'>
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" class="form-control" id="username" name="username"
+            placeholder="Choose a unique username">
+        </div>
+        <div class="form-group">
+          <label for="fname">First Name</label>
+          <input type="text" class="form-control" id="fname" name="fname" placeholder="Enter Your First Name">
+        </div>
+        <div class="form-group">
+          <label for="lname">Last Name</label>
+          <input type="text" class="form-control" id="lname" name="lname" placeholder="Enter Your Last Name">
+        </div>
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com">
+        </div>
+        <div class="form-group">
+          <label for="pass1">Choose a password</label>
+          <input type="password" class="form-control" id="pass1" name="pass1" placeholder="Choose Your Password">
+        </div>
+        <div class="form-group">
+          <label for="pass2">Confirm Password</label>
+          <input type="password" class="form-control" id="pass2" name="pass2"
+            placeholder="Enter your password again">
+        </div>
+
+
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+
+</div>
+
+
+
+
+
+
+

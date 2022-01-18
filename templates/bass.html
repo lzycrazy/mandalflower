@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<!--<![endif]-->
+
+<head>
+    <meta charset="UTF-8">
+    <script>
+        if (navigator.userAgent.match(/MSIE|Internet Explorer/i) || navigator.userAgent.match(/Trident\/7\..*?rv:11/i)) {
+            var href = document.location.href;
+            if (!href.match(/[?&]nowprocket/)) {
+                if (href.indexOf("?") == -1) {
+                    if (href.indexOf("#") == -1) {
+                        document.location.href = href + "?nowprocket=1"
+                    } else {
+                        document.location.href = href.replace("#", "?nowprocket=1#")
+                    }
+                } else {
+                    if (href.indexOf("#") == -1) {
+                        document.location.href = href + "&nowprocket=1"
+                    } else {
+                        document.location.href = href.replace("#", "&nowprocket=1#")
+                    }
+                }
+            }
+        }
+    </script>
+    <script>
+        class RocketLazyLoadScripts {
+            constructor(e) {
+                this.triggerEvents = e, this.eventOptions = {
+                    passive: !0
+                }, this.userEventListener = this.triggerListener.bind(this), this.delayedScripts = {
+                    normal: [],
+                    async: [],
+                    defer: []
+                }, this.allJQueries = []
+            }
+            _addUserInteractionListener(e) {
+                this.triggerEvents.forEach((t => window.addEventListener(t, e.userEventListener, e.eventOptions)))
+            }
+            _removeUserInteractionListener(e) {
+                this.triggerEvents.forEach((t => window.removeEventListener(t, e.userEventListener, e.eventOptions)))
+            }
+            triggerListener() {
+                this._removeUserInteractionListener(this), "loading" === document.readyState ? document.addEventListener("DOMContentLoaded", this._loadEverythingNow.bind(this)) : this._loadEverythingNow()
+            }
+            async _loadEverythingNow() {
+                this._delayEventListeners(), this._delayJQueryReady(this), this._handleDocumentWrite(), this._registerAllDelayedScripts(), this._preloadAllScripts(), await this._loadScriptsFromList(this.delayedScripts.normal), await this._loadScriptsFromList(this.delayedScripts.defer), await this._loadScriptsFromList(this.delayedScripts.async), await this._triggerDOMContentLoaded(), await this._triggerWindowLoad(), window.dispatchEvent(new Event("rocket-allScriptsLoaded"))
+            }
+            _registerAllDelayedScripts() {
+                document.querySelectorAll("script[type=rocketlazyloadscript]").forEach((e => {
+                    e.hasAttribute("src") ? e.hasAttribute("async") && !1 !== e.async ? this.delayedScripts.async.push(e) : e.hasAttribute("defer") && !1 !== e.defer || "module" === e.getAttribute("data-rocket-type") ? this.delayedScripts.defer.push(e) : this.delayedScripts.normal.push(e) : this.delayedScripts.normal.push(e)
+                }))
+            }
+            async _transformScript(e) {
+                return await this._requestAnimFrame(), new Promise((t => {
+                    const n = document.createElement("script");
+                    let r;
+                    [...e.attributes].forEach((e => {
+                        let t = e.nodeName;
+                        "type" !== t && ("data-rocket-type" === t && (t = "type", r = e.nodeValue), n.setAttribute(t, e.nodeValue))
+                    })), e.hasAttribute("src") ? (n.addEventListener("load", t), n.addEventListener("error", t)) : (n.text = e.text, t()), e.parentNode.replaceChild(n, e)
+                }))
+            }
+            async _loadScriptsFromList(e) {
+                const t = e.shift();
+                return t ? (await this._transformScript(t), this._loadScriptsFromList(e)) : Promise.resolve()
+            }
+            _preloadAllScripts() {
+                var e = document.createDocumentFragment();
+                [...this.delayedScripts.normal, ...this.delayedScripts.defer, ...this.delayedScripts.async].forEach((t => {
+                    const n = t.getAttribute("src");
+                    if (n) {
+                        const t = document.createElement("link");
+                        t.href = n, t.rel = "preload", t.as = "script", e.appendChild(t)
+                    }
+                })), document.head.appendChild(e)
+            }
+            _delayEventListeners() {
+                let e = {};
+
+                function t(t, n) {
+                    ! function (t) {
+                        function n(n) {
+                            return e[t].eventsToRewrite.indexOf(n) >= 0 ? "rocket-" + n : n
+                        }
+                        e[t] || (e[t] = {
+                            originalFunctions: {
+                                add: t.addEventListener,
+                                remove: t.removeEventListener
+                            },
+                            eventsToRewrite: []
+                        }, t.addEventListener = function () {
+                            arguments[0] = n(arguments[0]), e[t].originalFunctions.add.apply(t, arguments)
+                        }, t.removeEventListener = function () {
+                            arguments[0] = n(arguments[0]), e[t].originalFunctions.remove.apply(t, arguments)
+                        })
+                    }(t), e[t].eventsToRewrite.push(n)
+                }
+
+                function n(e, t) {
+                    let n = e[t];
+                    Object.defineProperty(e, t, {
+                        get: () => n || function () { },
+                        set(r) {
+                            e["rocket" + t] = n = r
+                        }
+                    })
+                }
+                t(document, "DOMContentLoaded"), t(window, "DOMContentLoaded"), t(window, "load"), t(window, "pageshow"), t(document, "readystatechange"), n(document, "onreadystatechange"), n(window, "onload"), n(window, "onpageshow")
+            }
+            _delayJQueryReady(e) {
+                let t = window.jQuery;
+                Object.defineProperty(window, "jQuery", {
+                    get: () => t,
+                    set(n) {
+                        if (n && n.fn && !e.allJQueries.includes(n)) {
+                            n.fn.ready = n.fn.init.prototype.ready = function (t) {
+                                e.domReadyFired ? t.bind(document)(n) : document.addEventListener("rocket-DOMContentLoaded", (() => t.bind(document)(n)))
+                            };
+                            const t = n.fn.on;
+                            n.fn.on = n.fn.init.prototype.on = function () {
+                                if (this[0] === window) {
+                                    function e(e) {
+                                        return e.split(" ").map((e => "load" === e || 0 === e.indexOf("load.") ? "rocket-jquery-load" : e)).join(" ")
+                                    }
+                                    "string" == typeof arguments[0] || arguments[0] instanceof String ? arguments[0] = e(arguments[0]) : "object" == typeof arguments[0] && Object.keys(arguments[0]).forEach((t => {
+                                        delete Object.assign(arguments[0], {
+                                            [e(t)]: arguments[0][t]
+                                        })[t]
+                                    }))
+                                }
+                                return t.apply(this, arguments), this
+                            }, e.allJQueries.push(n)
+                        }
+                        t = n
+                    }
+                })
+            }
+            async _triggerDOMContentLoaded() {
+                this.domReadyFired = !0, await this._requestAnimFrame(), document.dispatchEvent(new Event("rocket-DOMContentLoaded")), await this._requestAnimFrame(), window.dispatchEvent(new Event("rocket-DOMContentLoaded")), await this._requestAnimFrame(), document.dispatchEvent(new Event("rocket-readystatechange")), await this._requestAnimFrame(), document.rocketonreadystatechange && document.rocketonreadystatechange()
+            }
+            async _triggerWindowLoad() {
+                await this._requestAnimFrame(), window.dispatchEvent(new Event("rocket-load")), await this._requestAnimFrame(), window.rocketonload && window.rocketonload(), await this._requestAnimFrame(), this.allJQueries.forEach((e => e(window).trigger("rocket-jquery-load"))), window.dispatchEvent(new Event("rocket-pageshow")), await this._requestAnimFrame(), window.rocketonpageshow && window.rocketonpageshow()
+            }
+            _handleDocumentWrite() {
+                const e = new Map;
+                document.write = document.writeln = function (t) {
+                    const n = document.currentScript,
+                        r = document.createRange(),
+                        i = n.parentElement;
+                    let o = e.get(n);
+                    void 0 === o && (o = n.nextSibling, e.set(n, o));
+                    const a = document.createDocumentFragment();
+                    r.setStart(a, 0), a.appendChild(r.createContextualFragment(t)), i.insertBefore(a, o)
+                }
+            }
+            async _requestAnimFrame() {
+                return new Promise((e => requestAnimationFrame(e)))
+            }
+            static run() {
+                const e = new RocketLazyLoadScripts(["keydown", "mousemove", "touchmove", "touchstart", "touchend", "wheel"]);
+                e._addUserInteractionListener(e)
+            }
+        }
+        RocketLazyLoadScripts.run();
+    </script>
+
+    <meta name="viewport" content="width=device-width">
+    <link rel="profile" href="//gmpg.org/xfn/11">
+    <title>Florial – Flower Store WooCommerce WordPress Theme &#8211; Just another WordPress site</title>
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Marcellus&#038;ver=5.8.2&#038;display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&#038;ver=5.8.2&#038;display=swap"
+        media="print" onload="this.media='all'" /><noscript>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Marcellus&#038;ver=5.8.2&#038;display=swap" />
+    </noscript>
+    <link rel="stylesheet"
+        href="https://wpbingosite.com/wordpress/florial/wp-content/cache/min/1/c374f76f8acfb7708a2186b03228c9ca.css"
+        media="all" data-minify="1" />
+    <meta name='robots' content='max-image-preview:large' />
+    <link rel='dns-prefetch' href='//fonts.googleapis.com' />
+    <link href='https://fonts.gstatic.com' crossorigin rel='preconnect' />
+    <link rel="alternate" type="application/rss+xml"
+        title="Florial – Flower Store WooCommerce WordPress Theme &raquo; Feed"
+        href="https://wpbingosite.com/wordpress/florial/feed/" />
+    <link rel="alternate" type="application/rss+xml"
+        title="Florial – Flower Store WooCommerce WordPress Theme &raquo; Comments Feed"
+        href="https://wpbingosite.com/wordpress/florial/comments/feed/" />
+    <style type="text/css">
+        img.wp-smiley,
+        img.emoji {
+            display: inline !important;
+            border: none !important;
+            box-shadow: none !important;
+            height: 1em !important;
+            width: 1em !important;
+            margin: 0 .07em !important;
+            vertical-align: -0.1em !important;
+            background: none !important;
+            padding: 0 !important;
+        }
+    </style>
+
+
+
+
+
+    <style id='woocommerce-inline-inline-css' type='text/css'>
+        .woocommerce form .form-row .required {
+            visibility: visible;
+        }
+    </style>
+
+
+
+
+
+
+    <style id='woosw-frontend-inline-css' type='text/css'>
+        .woosw-area .woosw-inner .woosw-content .woosw-content-bot .woosw-notice {
+            background-color: #ff2556;
+        }
+
+        .woosw-area .woosw-inner .woosw-content .woosw-content-bot .woosw-content-bot-inner .woosw-page a:hover,
+        .woosw-area .woosw-inner .woosw-content .woosw-content-bot .woosw-content-bot-inner .woosw-continue:hover {
+            color: #ff2556;
+        }
+    </style>
+
+
+    <!--[if lt IE 9]>
+<link rel='stylesheet' id='florial-ie-css'  href='https://wpbingosite.com/wordpress/florial/wp-content/themes/florial/css/ie.css?ver=20131205' type='text/css' media='all' />
+<![endif]-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <script type="text/template" id="tmpl-variation-template">
+        <div class="woocommerce-variation-description"></div>
+        <div class="woocommerce-variation-price"></div>
+        <div class="woocommerce-variation-availability"></div>
+    </script>
+    <script type="text/template" id="tmpl-unavailable-variation-template">
+        <p>Sorry, this product is unavailable. Please choose a different combination.</p>
+    </script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-includes/js/jquery/jquery.min.js?ver=3.6.0'
+        id='jquery-core-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.3.2'
+        id='jquery-migrate-js' defer></script>
+    <script type='text/javascript' id='buy-together-frontend-js-extra'>
+        /* <![CDATA[ */
+        var buy_together = {
+            "ajaxurl": "https:\/\/wpbingosite.com\/wordpress\/florial\/wp-admin\/admin-ajax.php",
+            "security": "dd547c268b",
+            "text": {
+                "for_num_of_items": "For {{number}} item(s)",
+                "add_to_cart_text": "Add All To Cart",
+                "adding_to_cart_text": "Adding To Cart...",
+                "view_cart": "View cart",
+                "no_product_selected_text": "You must select at least one product",
+                "add_to_cart_success": "{{number}} product(s) was successfully added to your cart.",
+                "add_to_cart_fail_single": "One product is out of stock.",
+                "add_to_cart_fail_plural": "{{number}} products were out of stocks."
+            },
+            "price_format": "%1$s%2$s",
+            "price_decimals": "2",
+            "price_thousand_separator": ",",
+            "price_decimal_separator": ".",
+            "currency_symbol": "$",
+            "wc_tax_enabled": "",
+            "cart_url": "https:\/\/wpbingosite.com\/wordpress\/florial\/cart\/",
+            "ex_tax_or_vat": ""
+        };
+        /* ]]> */
+    </script>
+    <script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/cache/min/1/wordpress/florial/wp-content/plugins/wpbingo/lib/buy-together/assets/js/frontend.js?ver=1640835999'
+        id='buy-together-frontend-js' defer></script>
+    <link rel="https://api.w.org/" href="https://wpbingosite.com/wordpress/florial/wp-json/" />
+    <link rel="alternate" type="application/json"
+        href="https://wpbingosite.com/wordpress/florial/wp-json/wp/v2/pages/9601" />
+    <link rel="EditURI" type="application/rsd+xml" title="RSD"
+        href="https://wpbingosite.com/wordpress/florial/xmlrpc.php?rsd" />
+    <link rel="wlwmanifest" type="application/wlwmanifest+xml"
+        href="https://wpbingosite.com/wordpress/florial/wp-includes/wlwmanifest.xml" />
+    <meta name="generator" content="WordPress 5.8.2" />
+    <meta name="generator" content="WooCommerce 6.0.0" />
+    <link rel="canonical" href="https://wpbingosite.com/wordpress/florial/" />
+    <link rel='shortlink' href='https://wpbingosite.com/wordpress/florial/' />
+    <link rel="alternate" type="application/json+oembed"
+        href="https://wpbingosite.com/wordpress/florial/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fwpbingosite.com%2Fwordpress%2Fflorial%2F" />
+    <link rel="alternate" type="text/xml+oembed"
+        href="https://wpbingosite.com/wordpress/florial/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fwpbingosite.com%2Fwordpress%2Fflorial%2F&#038;format=xml" />
+    <meta name="framework" content="Redux 4.3.5" /> <noscript>
+        <style>
+            .woocommerce-product-gallery {
+                opacity: 1 !important;
+            }
+        </style>
+    </noscript>
+    <link rel="icon"
+        href="https://wpbingosite.com/wordpress/florial/wp-content/uploads/2021/09/cropped-80x80-1-32x32.png"
+        sizes="32x32" />
+    <link rel="icon"
+        href="https://wpbingosite.com/wordpress/florial/wp-content/uploads/2021/09/cropped-80x80-1-192x192.png"
+        sizes="192x192" />
+    <link rel="apple-touch-icon"
+        href="https://wpbingosite.com/wordpress/florial/wp-content/uploads/2021/09/cropped-80x80-1-180x180.png" />
+    <meta name="msapplication-TileImage"
+        content="https://wpbingosite.com/wordpress/florial/wp-content/uploads/2021/09/cropped-80x80-1-270x270.png" />
+    <noscript>
+        <style id="rocket-lazyload-nojs-css">
+            .rll-youtube-player,
+            [data-lazy-src] {
+                display: none !important;
+            }
+        </style>
+    </noscript>
+</head>
+
+<body
+    class="home page-template page-template-page-templates page-template-homepage page-template-page-templateshomepage-php page page-id-9601 theme-florial woocommerce-no-js banners-effect-1 elementor-default elementor-kit-9482 elementor-page elementor-page-9601">
+    <div id='page' class="hfeed page-wrapper  ">
+        <h1 class="bwp-title hide"><a href="/" rel="home">MANDAL FLORIST</a></h1>
+        <header id='bwp-header' class="bwp-header header-v1">
+            <div id="bwp-topbar" class="topbar-v1 hidden-sm hidden-xs">
+                <div class="topbar-inner">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 topbar-left hidden-sm hidden-xs">
+                                <!-- <div class="address hidden-xs">
+                                    <a href="#"><i class="icon-pin"></i>Find Store</a>
+                                </div> -->
+                                <div class="phone hidden-sm hidden-xs">
+                                    <a href="/"><i class="icon-telephone"></i></a>
+                                </div>
+                            </div>
+                            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12 topbar-right">
+                                <ul id="topbar_menu" class="menu">
+                                    <!-- <li id="menu-item-27352"
+                                        class="menu-item menu-item-type-custom menu-item-object-custom menu-item-27352">
+                                        <a href="#">Gift Cards</a></li>
+                                    <li id="menu-item-16654"
+                                        class="menu-item menu-item-type-post_type menu-item-object-page menu-item-16654">
+                                        <a href="https://wpbingosite.com/wordpress/florial/faq/">FAQs</a></li> -->
+                                    <li id="menu-item-27353"
+                                        class="menu-item menu-item-type-post_type menu-item-object-page menu-item-27353">
+                                        <a href="/contact">Contact</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-mobile">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-3 col-3 header-left">
+                            <div class="navbar-header">
+                                <button type="button" id="show-megamenu" class="navbar-toggle">
+                                    <span>Menu</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-6 header-center ">
+                            <div class="wpbingoLogo">
+                                <a href="/">
+                                    <img width="400" height="124"
+                                        src="..static/images/deal.png"
+                                        alt="Florist –"
+                                        data-lazy-src="..static/images/deal.png" /><noscript><img
+                                            width="400" height="124"
+                                            src="..static/images/deal.png"
+                                            alt="Florist" /></noscript>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-3 col-3 header-right">
+                            <div class="florial-topcart dropdown">
+                                <div class="dropdown mini-cart top-cart"
+                                    data-text_added="Product was added to cart successfully!">
+                                    <div class="remove-cart-shadow"></div>
+
+                                
+                                    <a  href="/cart/cart-detail/" role="button" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                        <div class="icons-cart"><i class="feather-shopping-bag"></i><span
+                                                class="cart-count">{{request.session.cart|length}}</span></div>
+                                    </a>
+
+                                    <div class="dropdown-menu cart-popup">
+                                        <div class="remove-cart">
+                                            <a class="dropdown-toggle cart-remove" data-toggle="dropdown"
+                                                data-hover="dropdown" data-delay="0" href="#"
+                                                title="View your shopping cart">
+                                                Close<i class="icon_close"></i>
+                                            </a>
+                                        </div>
+                                        <div class="top-total-cart">Cart (0)</div>
+                                        <div class="cart-icon-big"></div>
+                                        <ul class="cart_list product_list_widget ">
+                                            <li class="empty">
+                                                <span>No products in the cart.</span>
+                                                <a class="go-shop"
+                                                    href="https://wpbingosite.com/wordpress/florial/shop/">GO TO SHOP <i
+                                                        aria-hidden="true" class="arrow_right"></i></a>
+                                            </li>
+                                        </ul>
+                                        <!-- end product list -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-mobile-fixed">
+                    <div class="shop-page">
+                        <a href="https://wpbingosite.com/wordpress/florial/shop/"><i class="wpb-icon-shop"></i></a>
+                    </div>
+                    <div class="my-account">
+                        <div class="login-header">
+                            <a href="https://wpbingosite.com/wordpress/florial/my-account/"><i
+                                    class="wpb-icon-user"></i></a>
+                        </div>
+                    </div>
+                    <!-- Begin Search -->
+                    <div class="search-box">
+                        <div class="search-toggle"><i class="wpb-icon-magnifying-glass"></i></div>
+                    </div>
+                    <!-- End Search -->
+                    <div class="wishlist-box">
+                        <a href="https://wpbingosite.com/wordpress/florial/wishlist/"><i class="wpb-icon-heart"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="header-desktop">
+                <div class='header-wrapper' data-sticky_header="1">
+                    <div class="container">
+                        <div class="container-inner">
+                            <div class="row">
+                                <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12 header-left">
+                                    <div class="wpbingoLogo">
+                                        <a href="/">
+                                            <img width="400" height="124"
+                                                src="../static/images/mandal florist.png"
+                                                alt="Mandal Florist"
+                                                data-lazy-src="../static/images/mandal florist.png" /><noscript><img
+                                                    width="400" height="124"
+                                                    src="../static/images/mandal florist.png"
+                                                    alt="Mandal Florist"></noscript>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12 text-center">
+                                    <div class="wpbingo-menu-mobile header-menu">
+                                        <div class="header-menu-bg">
+                                            <div class="wpbingo-menu-wrapper">
+                                                <div class="megamenu">
+                                                    <nav class="navbar-default">
+                                                        <div class="bwp-navigation primary-navigation navbar-mega"
+                                                            data-text_close="Close">
+                                                            <div class="float-menu">
+                                                                <nav id="main-navigation" class="std-menu clearfix">
+                                                                    <div class="menu-main-menu-container">
+                                                                        <ul id="menu-main-menu" class="menu">
+                                                                            <li
+                                                                                class="level-0 menu-item-28859      menu-item menu-item-type-post_type menu-item-object-page menu-item-home current-menu-item page_item page-item-9601 current_page_item current-menu-ancestor current-menu-parent current_page_parent current_page_ancestor menu-item-has-children  std-menu      ">
+                                                                                <a
+                                                                                    href="/"><span
+                                                                                        class="menu-item-text">Home</span></a>
+
+                                                                            </li>
+
+                                                                            <li
+                                                                            class="level-0 menu-item-28859      menu-item menu-item-type-post_type menu-item-object-page menu-item-home current-menu-item page_item page-item-9601 current_page_item current-menu-ancestor current-menu-parent current_page_parent current_page_ancestor menu-item-has-children  std-menu      ">
+                                                                            <a
+                                                                                href="/about"><span
+                                                                                    class="menu-item-text">About</span></a>
+
+                                                                        </li>
+
+                                                                        <li
+                                                                        class="level-0 menu-item-28859      menu-item menu-item-type-post_type menu-item-object-page menu-item-home current-menu-item page_item page-item-9601 current_page_item current-menu-ancestor current-menu-parent current_page_parent current_page_ancestor menu-item-has-children  std-menu      ">
+                                                                        <a
+                                                                            href="/contact"><span
+                                                                                class="menu-item-text">Contact</span></a>
+
+                                                                    </li>
+
+
+
+                                                                            <li
+                                                                                class="level-0 menu-item-12288      menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children  std-menu      ">
+                                                                                <a href="#"><span
+                                                                                        class="menu-item-text">Shop</span></a>
+                                                                                <ul class="sub-menu">
+
+                                                                                    {%for cat in category%}
+                                                                                    <li
+                                                                                        class="level-1 menu-item-10694      menu-item menu-item-type-post_type menu-item-object-page  std-menu      ">
+                                                                                        <a
+                                                                                            href="/category={{cat.slug}}">{{cat.name}}</a>
+                                                                                    </li>
+                                                                                    {%endfor%}
+
+                                                                                </ul>
+                                                                            </li>
+                                                                        </ul>
+                                                                    </div>
+                                                                </nav>
+
+                                                            </div>
+
+                                                        </div>
+                                                    </nav>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12 header-right">
+                                    <div class="header-page-link">
+                                        <!-- Begin Search -->
+                                        <div class="search-box">
+                                            <div class="search-toggle"><i class="feather-search"></i></div>
+                                        </div>
+                                        <div class="login-header" >
+                                            <a class="active-login" href="/signup"><i class="feather-user"></i></a>
+
+                                        </div>
+                                        {%if user.is_authenticated %}
+                                        <h3 class="mx-2 " style="color: black;">{{request.user}}</h3>
+                                        <a href="/handlelogout"><button class="btn nav_hover mx-1"><i class="fas fa-sign-out-alt"></i></button></a>
+                                  
+                                        {%else%}
+                                        <!-- <button type="button" class="btn  mx-1" data-toggle="modal" data-target="#loginModal">
+                                          Login
+                                        </button> -->
+                                        <a href="/handlelogin1"> <button class="btn nav_hover "></button></a>
+                                  
+                                       
+                                        {%endif%}
+
+
+                                        {%if user.is_authenticated %}
+                                        <div class="wishlist-box">
+                                            <a href="/cart/cart-detail/"><i class="feather-shopping-bag"></i></a>
+                                            <div class="icons-cart"><span
+                                                class="cart-count"></span></div>
+                                        </div> 
+                                        {%else%}
+
+                                        <div class="wishlist-box">
+                                            <a href="/handlelogin1"><i class="feather-shopping-bag"></i></a>
+                                            <div class="icons-cart"><span
+                                                class="cart-count"></span></div>
+                                        </div> 
+                                        {%endif%}
+                                        <!-- End Search -->
+
+                                        
+                                        <!-- {%if user.is_authenticated %}
+                                        
+                                        <h3 class="mx-2 " style="color: black;">{{request.user}} logged In</h3>
+                                        <a href="/handlelogout"><button class="btn nav_hover mx-1">Logout</button></a>
+
+                                        {%else%}
+                                        <div class="login-header">
+                                            <a class="active-login" href="/handlelogin1"><i class="feather-user"></i></a>
+                                        </div>
+
+                                        {%endif%}
+                                        
+                                        <div class="wishlist-box">
+                                            <a href="/cart/cart-detail/"><i class="feather-shopping-bag"></i></a>
+                                            <div class="icons-cart"><span
+                                                class="cart-count"></span></div>
+                                        </div> -->
+                                       
+                                   
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End header-wrapper -->
+            </div>
+        </header>
+        <!-- End #bwp-header -->
+        <div id="bwp-main" class="bwp-main">
+            <div data-bg="https://wpbingosite.com/wordpress/florial/wp-content/uploads/2021/09/bg-breadcrumb.jpg"
+                data-bg_default="https://wpbingosite.com/wordpress/florial/wp-content/uploads/2021/09/bg-breadcrumb.jpg"
+                class="page-title bwp-title rocket-lazyload" style="">
+                <div class="container">
+                    <div class="content-title-heading">
+                        <span class="back-to-shop">Shop</span>
+                        <h1 class="text-title-heading">
+                            Home Clean </h1>
+                    </div>
+                    <!-- Page Title -->
+                </div>
+            </div>
+            <!-- .container -->
+            <div id="main-content" class="main-content">
+                <div id="primary" class="content-area container">
+                    <div id="content" class="site-content" role="main">
+                        <article id="post-9601" class="post-9601 page type-page status-publish hentry">
+                            <div class="entry-content clearfix">
+                                <div data-elementor-type="wp-page" data-elementor-id="9601"
+                                    class="elementor elementor-9601" data-elementor-settings="[]">
+                                    <div class="elementor-inner">
+                                        <div class="elementor-section-wrap">
+                                            <section
+                                                class="elementor-section elementor-top-section elementor-element elementor-element-eeda3ae elementor-section-full_width elementor-section-height-default elementor-section-height-default"
+                                                data-id="eeda3ae" data-element_type="section">
+                                                <div class="elementor-container elementor-column-gap-default">
+                                                    <div class="elementor-row">
+                                                        <div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-bf715c6"
+                                                            data-id="bf715c6" data-element_type="column">
+                                                            <div
+                                                                class="elementor-column-wrap elementor-element-populated">
+                                                                <div class="elementor-widget-wrap">
+                                                                    <div class="elementor-element elementor-element-8702c7a elementor-widget elementor-widget-bwp_slider"
+                                                                        data-id="8702c7a" data-element_type="widget"
+                                                                        data-widget_type="bwp_slider.default">
+                                                                        <div class="elementor-widget-container">
+                                                                            <div class="bwp-slider slider-homepage1">
+                                                                                <div class="slick-carousel slick-carousel-center"
+                                                                                    data-autoplay="true"
+                                                                                    data-dots="false" data-nav="true"
+                                                                                    data-columns4="1" data-columns3="1"
+                                                                                    data-columns2="1" data-columns1="1"
+                                                                                    data-columns1440="1"
+                                                                                    data-columns="1">
+                                                                                    <div class="item">
+                                                                                        <div class="item-content">
+                                                                                            <div class="content-image">
+                                                                                                <img width="1920"
+                                                                                                    height="1048"
+                                                                                                    src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%201920%201048'%3E%3C/svg%3E"
+                                                                                                    alt="Image Slider"
+                                                                                                    data-lazy-src="https://wpbingosite.com/wordpress/florial/wp-content/uploads/2021/11/slider-1.jpg"><noscript><img
+                                                                                                        width="1920"
+                                                                                                        height="1048"
+                                                                                                        src="https://wpbingosite.com/wordpress/florial/wp-content/uploads/2021/11/slider-1.jpg"
+                                                                                                        alt="Image Slider"></noscript>
+                                                                                            </div>
+                                                                                            <div
+                                                                                                class="item-info horizontal_start vertical_middle align_left">
+                                                                                                <div class="content">
+                                                                                                    <div
+                                                                                                        class="subtitle-slider">
+                                                                                                        <span>VALENTINE
+                                                                                                            GIFT</span>
+                                                                                                    </div>
+                                                                                                    <h2
+                                                                                                        class="title-slider">
+                                                                                                        <span>Fresh
+                                                                                                            Flower
+                                                                                                            <br>&amp;
+                                                                                                            Feeling Love
+                                                                                                        </span></h2>
+                                                                                                    <a class="button-slider"
+                                                                                                        href="/">SHOP
+                                                                                                        NOW</a>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="item">
+                                                                                        <div class="item-content">
+                                                                                            <div class="content-image">
+                                                                                                <img width="1920"
+                                                                                                    height="1048"
+                                                                                                    src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%201920%201048'%3E%3C/svg%3E"
+                                                                                                    alt="Image Slider"
+                                                                                                    data-lazy-src="https://wpbingosite.com/wordpress/florial/wp-content/uploads/2021/09/slider-2.jpg"><noscript><img
+                                                                                                        width="1920"
+                                                                                                        height="1048"
+                                                                                                        src="https://wpbingosite.com/wordpress/florial/wp-content/uploads/2021/09/slider-2.jpg"
+                                                                                                        alt="Image Slider"></noscript>
+                                                                                            </div>
+                                                                                            <div
+                                                                                                class="item-info horizontal_start vertical_middle align_left">
+                                                                                                <div class="content">
+                                                                                                    <div
+                                                                                                        class="subtitle-slider">
+                                                                                                        <span>Birthdays
+                                                                                                            GIFT</span>
+                                                                                                    </div>
+                                                                                                    <h2
+                                                                                                        class="title-slider">
+                                                                                                        <span>Inspired
+                                                                                                            <br>By
+                                                                                                            Nature</span>
+                                                                                                    </h2>
+                                                                                                    <a class="button-slider"
+                                                                                                        href="https://wpbingosite.com/wordpress/florial/shop/">SHOP
+                                                                                                        NOW</a>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="item">
+                                                                                        <div class="item-content">
+                                                                                            <div class="content-image">
+                                                                                                <img width="1920"
+                                                                                                    height="1048"
+                                                                                                    src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%201920%201048'%3E%3C/svg%3E"
+                                                                                                    alt="Image Slider"
+                                                                                                    data-lazy-src="https://wpbingosite.com/wordpress/florial/wp-content/uploads/2021/09/slider-3.jpg"><noscript><img
+                                                                                                        width="1920"
+                                                                                                        height="1048"
+                                                                                                        src="https://wpbingosite.com/wordpress/florial/wp-content/uploads/2021/09/slider-3.jpg"
+                                                                                                        alt="Image Slider"></noscript>
+                                                                                            </div>
+                                                                                            <div
+                                                                                                class="item-info horizontal_start vertical_middle align_left">
+                                                                                                <div class="content">
+                                                                                                    <div
+                                                                                                        class="subtitle-slider">
+                                                                                                        <span>Inspired
+                                                                                                            By
+                                                                                                            Nature</span>
+                                                                                                    </div>
+                                                                                                    <h2
+                                                                                                        class="title-slider">
+                                                                                                        <span>Fresh
+                                                                                                            flowers<br>
+                                                                                                            for
+                                                                                                            you</span>
+                                                                                                    </h2>
+                                                                                                    <a class="button-slider"
+                                                                                                        href="https://wpbingosite.com/wordpress/florial/shop/">SHOP
+                                                                                                        NOW</a>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </section>
+
+                                            <!-- messages -->
+  {%for msg in messages%}
+  <div class="alert alert-{{msg.tags}} alert-dismissible fade show" role="alert">
+    <strong>Message : </strong> {{msg}}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  {%endfor%}
+
+                                            <h1 class="my-5"></h1>
+
+                                            {%block body%} {%endblock%}
+                                       
+        <!-- #main -->
+        <h1 class="my-5"></h1>
+        <footer id="bwp-footer" class="bwp-footer footer-1">
+            <div data-elementor-type="wp-post" data-elementor-id="11196" class="elementor elementor-11196"
+                data-elementor-settings="[]">
+                <div class="elementor-inner">
+                    <div class="elementor-section-wrap">
+                        <section
+                            class="elementor-section elementor-top-section elementor-element elementor-element-2a265be elementor-section-boxed elementor-section-height-default elementor-section-height-default"
+                            data-id="2a265be" data-element_type="section"
+                            data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+                            <div class="elementor-container elementor-column-gap-default">
+                                <div class="elementor-row">
+
+                                    
+                                    <div class="elementor-column elementor-col-25 elementor-top-column elementor-element elementor-element-f187a7a wpb-col-sm-50"
+                                    data-id="f187a7a" data-element_type="column">
+                                    <div class="elementor-column-wrap elementor-element-populated">
+                                        <div class="elementor-widget-wrap">
+                                            <div class="elementor-element elementor-element-58b15bd elementor-widget elementor-widget-heading"
+                                                data-id="58b15bd" data-element_type="widget"
+                                                data-widget_type="heading.default">
+                                                <div class="elementor-widget-container">
+                                                    <h2 class="elementor-heading-title elementor-size-default">About Us</h2>
+                                                </div>
+                                            </div>
+
+                                            
+
+                                            <div class="elementor-element elementor-element-964b6c7 elementor-icon-list--layout-traditional elementor-list-item-link-full_width elementor-widget elementor-widget-icon-list"
+                                                data-id="964b6c7" data-element_type="widget"
+                                                data-widget_type="icon-list.default">
+                                                <div class="elementor-widget-container">
+                                                    <ul class="elementor-icon-list-items">
+                                                        <li class="elementor-icon-list-item">
+                                                           
+
+                                                                <span class="elementor-icon-list-text">B.P Complex, Sector-29,</span>
+                                                                
+                                                           
+                                                        </li>
+                                                        <li class="elementor-icon-list-item">
+                                                           
+
+                                                            <span class="elementor-icon-list-text">Near Police Chowki, Noida</span>
+                                                            
+                                                       
+                                                    </li>
+                                                    <li class="elementor-icon-list-item">
+                                                           
+
+                                                        <span class="elementor-icon-list-text">Phone No:- 9811623935 </span>
+                                                        <!-- <span class="elementor-icon-list-text">Paytm:- 9170173935</span> -->
+                                                        
+                                                   
+                                                </li>
+                                                <li class="elementor-icon-list-item">
+                                                           
+
+                                                    <!-- <span class="elementor-icon-list-text">Phone No:- 9811623935 </span> -->
+                                                    <span class="elementor-icon-list-text">Paytm:- 9170173935</span>
+                                                    
+                                               
+                                            </li>
+                                                       
+                                                     
+                                                      
+                                                      
+                                                      
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                    <!-- end -->
+                                    <div class="elementor-column elementor-col-25 elementor-top-column elementor-element elementor-element-f187a7a wpb-col-sm-50"
+                                        data-id="f187a7a" data-element_type="column">
+                                        <div class="elementor-column-wrap elementor-element-populated">
+                                            <div class="elementor-widget-wrap">
+                                                <div class="elementor-element elementor-element-58b15bd elementor-widget elementor-widget-heading"
+                                                    data-id="58b15bd" data-element_type="widget"
+                                                    data-widget_type="heading.default">
+                                                    <div class="elementor-widget-container">
+                                                        <h2 class="elementor-heading-title elementor-size-default">Pages</h2>
+                                                    </div>
+                                                </div>
+
+                                                
+
+                                                <div class="elementor-element elementor-element-964b6c7 elementor-icon-list--layout-traditional elementor-list-item-link-full_width elementor-widget elementor-widget-icon-list"
+                                                    data-id="964b6c7" data-element_type="widget"
+                                                    data-widget_type="icon-list.default">
+                                                    <div class="elementor-widget-container">
+                                                        <ul class="elementor-icon-list-items">
+                                                            <li class="elementor-icon-list-item">
+                                                                <a
+                                                                    href="https://wpbingosite.com/wordpress/florial/about-us/">
+
+                                                                    <span class="elementor-icon-list-text">Home</span>
+                                                                </a>
+                                                            </li>
+                                                            <li class="elementor-icon-list-item">
+                                                                <a
+                                                                    href="/about">
+
+                                                                    <span class="elementor-icon-list-text">About Us</span>
+                                                                </a>
+                                                            </li>
+                                                            <li class="elementor-icon-list-item">
+                                                                <a
+                                                                    href="/contact">
+
+                                                                    <span class="elementor-icon-list-text">Contact Us</span>
+                                                                </a>
+                                                            </li>
+                                                          
+                                                          
+                                                          
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="elementor-column elementor-col-25 elementor-top-column elementor-element elementor-element-b27078b wpb-col-sm-50"
+                                        data-id="b27078b" data-element_type="column">
+                                        <div class="elementor-column-wrap elementor-element-populated">
+                                            <div class="elementor-widget-wrap">
+                                                <div class="elementor-element elementor-element-35479f7 elementor-widget elementor-widget-heading"
+                                                    data-id="35479f7" data-element_type="widget"
+                                                    data-widget_type="heading.default">
+                                                    <div class="elementor-widget-container">
+                                                        <h2 class="elementor-heading-title elementor-size-default">Services
+                                                        </h2>
+                                                    </div>
+                                                </div>
+                                                <div class="elementor-element elementor-element-670cc3c elementor-icon-list--layout-traditional elementor-list-item-link-full_width elementor-widget elementor-widget-icon-list"
+                                                    data-id="670cc3c" data-element_type="widget"
+                                                    data-widget_type="icon-list.default">
+                                                    <div class="elementor-widget-container">
+                                                        <ul class="elementor-icon-list-items">
+
+                                                            {%for cat in catt %}
+                                                            <li class="elementor-icon-list-item">
+                                                                <a
+                                                                    href="/category={{cat.slug}}">
+
+                                                                    <span class="elementor-icon-list-text">{{cat.name}}</span>
+                                                                </a>
+                                                            </li>
+                                                          {%endfor%}
+                                                          
+                                                          
+                                                          
+                                                            <!-- <li class="elementor-icon-list-item">
+                                                                <a
+                                                                    href="https://wpbingosite.com/wordpress/florial/contact/">
+
+                                                                    <span class="elementor-icon-list-text">Privacy
+                                                                        Policy</span>
+                                                                </a>
+                                                            </li> -->
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- <div class="elementor-column elementor-col-25 elementor-top-column elementor-element elementor-element-d3d4834 wpb-col-sm-50 m-t-50"
+                                        data-id="d3d4834" data-element_type="column">
+                                        <div class="elementor-column-wrap elementor-element-populated">
+                                            <div class="elementor-widget-wrap">
+                                                <div class="elementor-element elementor-element-ae9d913 elementor-widget elementor-widget-heading"
+                                                    data-id="ae9d913" data-element_type="widget"
+                                                    data-widget_type="heading.default">
+                                                    <div class="elementor-widget-container">
+                                                        <h2 class="elementor-heading-title elementor-size-default">LOCAL
+                                                        </h2>
+                                                    </div>
+                                                </div>
+                                                <div class="elementor-element elementor-element-034d7ef elementor-icon-list--layout-traditional elementor-list-item-link-full_width elementor-widget elementor-widget-icon-list"
+                                                    data-id="034d7ef" data-element_type="widget"
+                                                    data-widget_type="icon-list.default">
+                                                    <div class="elementor-widget-container">
+                                                        <ul class="elementor-icon-list-items">
+                                                            <li class="elementor-icon-list-item">
+                                                                <a
+                                                                    href="https://wpbingosite.com/wordpress/florial/shop/">
+
+                                                                    <span class="elementor-icon-list-text">Los
+                                                                        Angeles</span>
+                                                                </a>
+                                                            </li>
+                                                            <li class="elementor-icon-list-item">
+                                                                <a
+                                                                    href="https://wpbingosite.com/wordpress/florial/shop/">
+
+                                                                    <span class="elementor-icon-list-text">San
+                                                                        Francisco</span>
+                                                                </a>
+                                                            </li>
+                                                            <li class="elementor-icon-list-item">
+                                                                <a
+                                                                    href="https://wpbingosite.com/wordpress/florial/shop/">
+
+                                                                    <span class="elementor-icon-list-text">New York
+                                                                        City</span>
+                                                                </a>
+                                                            </li>
+                                                            <li class="elementor-icon-list-item">
+                                                                <a
+                                                                    href="https://wpbingosite.com/wordpress/florial/shop/">
+
+                                                                    <span class="elementor-icon-list-text">Dallas</span>
+                                                                </a>
+                                                            </li>
+                                                            <li class="elementor-icon-list-item">
+                                                                <a
+                                                                    href="https://wpbingosite.com/wordpress/florial/shop/">
+
+                                                                    <span
+                                                                        class="elementor-icon-list-text">Chicago</span>
+                                                                </a>
+                                                            </li>
+                                                            <li class="elementor-icon-list-item">
+                                                                <a
+                                                                    href="https://wpbingosite.com/wordpress/florial/shop/">
+
+                                                                    <span class="elementor-icon-list-text">Washington
+                                                                        DC</span>
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div> -->
+                                    <div class="elementor-column elementor-col-25 elementor-top-column elementor-element elementor-element-f6df831 wpb-col-sm-50 m-t-50"
+                                        data-id="f6df831" data-element_type="column">
+                                        <div class="elementor-column-wrap elementor-element-populated">
+                                            <div class="elementor-widget-wrap">
+                                                <div class="elementor-element elementor-element-b63785d elementor-widget elementor-widget-heading"
+                                                    data-id="b63785d" data-element_type="widget"
+                                                    data-widget_type="heading.default">
+                                                    <div class="elementor-widget-container">
+                                                        <h2 class="elementor-heading-title elementor-size-default">OUR
+                                                            NEWSLETTER</h2>
+                                                    </div>
+                                                </div>
+                                                <div class="elementor-element elementor-element-eaf5d55 elementor-widget elementor-widget-text-editor"
+                                                    data-id="eaf5d55" data-element_type="widget"
+                                                    data-widget_type="text-editor.default">
+                                                    <div class="elementor-widget-container">
+                                                        <div class="elementor-text-editor elementor-clearfix">
+                                                            Sign up for the latest Ice offers and exclusives. </div>
+                                                    </div>
+                                                </div>
+                                                <div class="elementor-element elementor-element-d660ad1 elementor-widget elementor-widget-shortcode"
+                                                    data-id="d660ad1" data-element_type="widget"
+                                                    data-widget_type="shortcode.default">
+                                                    <div class="elementor-widget-container">
+                                                        <div class="elementor-shortcode">
+                                                            <div role="form" class="wpcf7" id="wpcf7-f1287-o1"
+                                                                lang="en-US" dir="ltr">
+                                                                <div class="screen-reader-response">
+                                                                    <p role="status" aria-live="polite"
+                                                                        aria-atomic="true"></p>
+                                                                    <ul></ul>
+                                                                </div>
+                                                                <form action="/wordpress/florial/#wpcf7-f1287-o1"
+                                                                    method="post" class="wpcf7-form init"
+                                                                    novalidate="novalidate" data-status="init">
+                                                                    <div style="display: none;">
+                                                                        <input type="hidden" name="_wpcf7"
+                                                                            value="1287" />
+                                                                        <input type="hidden" name="_wpcf7_version"
+                                                                            value="5.5.3" />
+                                                                        <input type="hidden" name="_wpcf7_locale"
+                                                                            value="en_US" />
+                                                                        <input type="hidden" name="_wpcf7_unit_tag"
+                                                                            value="wpcf7-f1287-o1" />
+                                                                        <input type="hidden"
+                                                                            name="_wpcf7_container_post" value="0" />
+                                                                        <input type="hidden"
+                                                                            name="_wpcf7_posted_data_hash" value="" />
+                                                                    </div>
+                                                                    <div class="wpbingo-newsletter newsletter-default">
+                                                                        <div class="content-newsletter">
+                                                                            <span
+                                                                                class="wpcf7-form-control-wrap your-email"><input
+                                                                                    type="email" name="your-email"
+                                                                                    value="" size="40"
+                                                                                    class="wpcf7-form-control wpcf7-text wpcf7-email wpcf7-validates-as-required wpcf7-validates-as-email"
+                                                                                    aria-required="true"
+                                                                                    aria-invalid="false"
+                                                                                    placeholder="Email address..." /></span>
+                                                                            <span class="clearfix"><input type="submit"
+                                                                                    value="SUBMIT"
+                                                                                    class="wpcf7-form-control has-spinner wpcf7-submit" /></span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="wpcf7-response-output"
+                                                                        aria-hidden="true"></div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="elementor-element elementor-element-0db961b elementor-widget elementor-widget-shortcode"
+                                                    data-id="0db961b" data-element_type="widget"
+                                                    data-widget_type="shortcode.default">
+                                                    <div class="elementor-widget-container">
+                                                        <div class="elementor-shortcode">
+                                                            <ul class="social-link">
+                                                                <!-- <li><a href="#"><i class="fa fa-twitter"></i></a></li>
+                                                                <li><a href="#"><i class="fa fa-instagram"></i></a></li>
+                                                                <li><a href="#"><i class="fa fa-dribbble"></i></a></li>
+                                                                <li><a href="#"><i class="fa fa-behance"></i></a></li> -->
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <section
+                            class="elementor-section elementor-top-section elementor-element elementor-element-ef8f308 elementor-section-boxed elementor-section-height-default elementor-section-height-default"
+                            data-id="ef8f308" data-element_type="section"
+                            data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+                            <div class="elementor-container elementor-column-gap-default">
+                                <div class="elementor-row">
+                                    <div class="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-ca91b99"
+                                        data-id="ca91b99" data-element_type="column">
+                                        <div class="elementor-column-wrap elementor-element-populated">
+                                            <div class="elementor-widget-wrap">
+                                                <div class="elementor-element elementor-element-409d6dc elementor-widget__width-auto elementor-widget-mobile__width-inherit elementor-widget elementor-widget-text-editor"
+                                                    data-id="409d6dc" data-element_type="widget"
+                                                    data-widget_type="text-editor.default">
+                                                    <div class="elementor-widget-container">
+                                                        <div class="elementor-text-editor elementor-clearfix">
+                                                            Copyright © 2021 Florial Flower </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-6b14dbc"
+                                        data-id="6b14dbc" data-element_type="column">
+                                        <div class="elementor-column-wrap elementor-element-populated">
+                                            <div class="elementor-widget-wrap">
+                                                <div class="elementor-element elementor-element-0865215 elementor-widget elementor-widget-image"
+                                                    data-id="0865215" data-element_type="widget"
+                                                    data-widget_type="image.default">
+                                                    <div class="elementor-widget-container">
+                                                        <div class="elementor-image">
+                                                            <img width="397" height="32"
+                                                                src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20397%2032'%3E%3C/svg%3E"
+                                                                class="attachment-full size-full" alt=""
+                                                                data-lazy-src="https://wpbingosite.com/wordpress/florial/wp-content/uploads/2020/06/payment.png" /><noscript><img
+                                                                    width="397" height="32"
+                                                                    src="https://wpbingosite.com/wordpress/florial/wp-content/uploads/2020/06/payment.png"
+                                                                    class="attachment-full size-full"
+                                                                    alt="" /></noscript>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+    <!-- #page -->
+    <div class="search-overlay">
+        <div class="container wrapper-search">
+            <div class="search-top">
+                <h2>what are you looking for?</h2>
+                <div class="close-search">close<i class="icon_close"></i></div>
+            </div>
+            <form role="search" method="get" class="search-from ajax-search"
+                action="/search"
+                data-admin="https://wpbingosite.com/wordpress/florial/wp-admin/admin-ajax.php" data-noresult="No Result"
+                data-limit="6">
+
+                <div class="search-box">
+                    <button id="searchsubmit" class="btn" type="submit">
+                        <i class="icon-search"></i>
+                        <span>search</span>
+                    </button>
+                    <input type="text" value="" name="query" id="query" class="input-search s" placeholder="Search..." />
+                    <div class="result-search-products-content">
+                        <ul class="result-search-products">
+                        </ul>
+                    </div>
+                </div>
+                <!-- <input type="hidden" name="post_type" value="product" /> -->
+            </form>
+
+        </div>
+    </div>
+    <div class="bwp-quick-view">
+    </div>
+    <div class="back-top">
+        <i class="arrow_carrot-up"></i>
+    </div>
+    <div id="woosw-area" class="woosw-area">
+        <div class="woosw-inner">
+            <div class="woosw-content">
+                <div class="woosw-content-top">
+                    Wishlist <span class="woosw-count">0</span>
+                    <span class="woosw-close"></span>
+                </div>
+                <div class="woosw-content-mid"></div>
+                <div class="woosw-content-bot">
+                    <div class="woosw-content-bot-inner">
+                        <a class="woosw-page" href="https://wpbingosite.com/wordpress/florial/wishlist/">
+                            Open wishlist page </a>
+                        <span class="woosw-continue" data-url="">
+                            Continue shopping </span>
+                    </div>
+                    <div class="woosw-notice"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="rocketlazyloadscript" data-rocket-type="text/javascript">
+        (function() {
+            var c = document.body.className;
+            c = c.replace(/woocommerce-no-js/, 'woocommerce-js');
+            document.body.className = c;
+        })();
+    </script>
+
+
+
+
+
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-includes/js/dist/vendor/regenerator-runtime.min.js?ver=0.13.7'
+        id='regenerator-runtime-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-includes/js/dist/vendor/wp-polyfill.min.js?ver=3.15.0'
+        id='wp-polyfill-js'></script>
+    <script type='text/javascript' id='contact-form-7-js-extra'>
+        /* <![CDATA[ */
+        var wpcf7 = {
+            "api": {
+                "root": "https:\/\/wpbingosite.com\/wordpress\/florial\/wp-json\/",
+                "namespace": "contact-form-7\/v1"
+            },
+            "cached": "1"
+        };
+        /* ]]> */
+    </script>
+    <script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/cache/min/1/wordpress/florial/wp-content/plugins/contact-form-7/includes/js/index.js?ver=1640835999'
+        id='contact-form-7-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/plugins/woocommerce/assets/js/jquery-blockui/jquery.blockUI.min.js?ver=2.7.0-wc.6.0.0'
+        id='jquery-blockui-js' defer></script>
+    <script type='text/javascript' id='wc-add-to-cart-js-extra'>
+        /* <![CDATA[ */
+        var wc_add_to_cart_params = {
+            "ajax_url": "\/wordpress\/florial\/wp-admin\/admin-ajax.php",
+            "wc_ajax_url": "\/wordpress\/florial\/?wc-ajax=%%endpoint%%",
+            "i18n_view_cart": "View cart",
+            "cart_url": "https:\/\/wpbingosite.com\/wordpress\/florial\/cart\/",
+            "is_cart": "",
+            "cart_redirect_after_add": "no"
+        };
+        /* ]]> */
+    </script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/plugins/woocommerce/assets/js/frontend/add-to-cart.min.js?ver=6.0.0'
+        id='wc-add-to-cart-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/plugins/woocommerce/assets/js/js-cookie/js.cookie.min.js?ver=2.1.4-wc.6.0.0'
+        id='js-cookie-js' defer></script>
+    <script type='text/javascript' id='woocommerce-js-extra'>
+        /* <![CDATA[ */
+        var woocommerce_params = {
+            "ajax_url": "\/wordpress\/florial\/wp-admin\/admin-ajax.php",
+            "wc_ajax_url": "\/wordpress\/florial\/?wc-ajax=%%endpoint%%"
+        };
+        /* ]]> */
+    </script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/plugins/woocommerce/assets/js/frontend/woocommerce.min.js?ver=6.0.0'
+        id='woocommerce-js' defer></script>
+    <script type='text/javascript' id='wc-cart-fragments-js-extra'>
+        /* <![CDATA[ */
+        var wc_cart_fragments_params = {
+            "ajax_url": "\/wordpress\/florial\/wp-admin\/admin-ajax.php",
+            "wc_ajax_url": "\/wordpress\/florial\/?wc-ajax=%%endpoint%%",
+            "cart_hash_key": "wc_cart_hash_1534bc1e540f43e2eade4f51a51efb28",
+            "fragment_name": "wc_fragments_1534bc1e540f43e2eade4f51a51efb28",
+            "request_timeout": "5000"
+        };
+        /* ]]> */
+    </script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/plugins/woocommerce/assets/js/frontend/cart-fragments.min.js?ver=6.0.0'
+        id='wc-cart-fragments-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-includes/js/jquery/ui/core.min.js?ver=1.12.1'
+        id='jquery-ui-core-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-includes/js/jquery/ui/mouse.min.js?ver=1.12.1'
+        id='jquery-ui-mouse-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-includes/js/jquery/ui/slider.min.js?ver=1.12.1'
+        id='jquery-ui-slider-js' defer></script>
+    <script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/cache/min/1/wordpress/florial/wp-content/plugins/wpbingo/assets/js/wpbingo.js?ver=1640835999'
+        id='bwp_wpbingo_js-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/plugins/woocommerce/assets/js/jquery-cookie/jquery.cookie.min.js?ver=1.4.1-wc.6.0.0'
+        id='jquery-cookie-js' defer></script>
+    <script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/cache/min/1/wordpress/florial/wp-content/plugins/wpbingo/assets/js/newsletter.js?ver=1640835999'
+        id='wpbingo-newsletter-js' defer></script>
+    <script type='text/javascript' id='bwp_woocommerce_filter-js-extra'>
+        /* <![CDATA[ */
+        var filter_ajax = {
+            "ajaxurl": "https:\/\/wpbingosite.com\/wordpress\/florial\/wp-admin\/admin-ajax.php"
+        };
+        /* ]]> */
+    </script>
+    <script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/cache/min/1/wordpress/florial/wp-content/plugins/wpbingo/assets/js/filter.js?ver=1640835999'
+        id='bwp_woocommerce_filter-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript' id='rocket-browser-checker-js-after'>
+        "use strict";
+        var _createClass = function() {
+            function defineProperties(target, props) {
+                for (var i = 0; i < props.length; i++) {
+                    var descriptor = props[i];
+                    descriptor.enumerable = descriptor.enumerable || !1, descriptor.configurable = !0, "value" in descriptor && (descriptor.writable = !0), Object.defineProperty(target, descriptor.key, descriptor)
+                }
+            }
+            return function(Constructor, protoProps, staticProps) {
+                return protoProps && defineProperties(Constructor.prototype, protoProps), staticProps && defineProperties(Constructor, staticProps), Constructor
+            }
+        }();
+
+        function _classCallCheck(instance, Constructor) {
+            if (!(instance instanceof Constructor)) throw new TypeError("Cannot call a class as a function")
+        }
+        var RocketBrowserCompatibilityChecker = function() {
+            function RocketBrowserCompatibilityChecker(options) {
+                _classCallCheck(this, RocketBrowserCompatibilityChecker), this.passiveSupported = !1, this._checkPassiveOption(this), this.options = !!this.passiveSupported && options
+            }
+            return _createClass(RocketBrowserCompatibilityChecker, [{
+                key: "_checkPassiveOption",
+                value: function(self) {
+                    try {
+                        var options = {
+                            get passive() {
+                                return !(self.passiveSupported = !0)
+                            }
+                        };
+                        window.addEventListener("test", null, options), window.removeEventListener("test", null, options)
+                    } catch (err) {
+                        self.passiveSupported = !1
+                    }
+                }
+            }, {
+                key: "initRequestIdleCallback",
+                value: function() {
+                    !1 in window && (window.requestIdleCallback = function(cb) {
+                        var start = Date.now();
+                        return setTimeout(function() {
+                            cb({
+                                didTimeout: !1,
+                                timeRemaining: function() {
+                                    return Math.max(0, 50 - (Date.now() - start))
+                                }
+                            })
+                        }, 1)
+                    }), !1 in window && (window.cancelIdleCallback = function(id) {
+                        return clearTimeout(id)
+                    })
+                }
+            }, {
+                key: "isDataSaverModeOn",
+                value: function() {
+                    return "connection" in navigator && !0 === navigator.connection.saveData
+                }
+            }, {
+                key: "supportsLinkPrefetch",
+                value: function() {
+                    var elem = document.createElement("link");
+                    return elem.relList && elem.relList.supports && elem.relList.supports("prefetch") && window.IntersectionObserver && "isIntersecting" in IntersectionObserverEntry.prototype
+                }
+            }, {
+                key: "isSlowConnection",
+                value: function() {
+                    return "connection" in navigator && "effectiveType" in navigator.connection && ("2g" === navigator.connection.effectiveType || "slow-2g" === navigator.connection.effectiveType)
+                }
+            }]), RocketBrowserCompatibilityChecker
+        }();
+    </script>
+    <script type='text/javascript' id='rocket-preload-links-js-extra'>
+        /* <![CDATA[ */
+        var RocketPreloadLinksConfig = {
+            "excludeUris": "\/wordpress\/florial(\/(.+\/)?feed\/?.+\/?|\/(?:.+\/)?embed\/|\/checkout\/|\/cart\/|\/my-account\/|\/wc-api\/v(.*)|\/(index\\.php\/)?wp\\-json(\/.*|$))|\/wp-admin\/|\/logout\/|\/wp-login.php",
+            "usesTrailingSlash": "1",
+            "imageExt": "jpg|jpeg|gif|png|tiff|bmp|webp|avif",
+            "fileExt": "jpg|jpeg|gif|png|tiff|bmp|webp|avif|php|pdf|html|htm",
+            "siteUrl": "https:\/\/wpbingosite.com\/wordpress\/florial",
+            "onHoverDelay": "100",
+            "rateThrottle": "3"
+        };
+        /* ]]> */
+    </script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript' id='rocket-preload-links-js-after'>
+        (function() {
+            "use strict";
+            var r = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(e) {
+                    return typeof e
+                } : function(e) {
+                    return e && "function" == typeof Symbol && e.constructor === Symbol && e !== Symbol.prototype ? "symbol" : typeof e
+                },
+                e = function() {
+                    function i(e, t) {
+                        for (var n = 0; n < t.length; n++) {
+                            var i = t[n];
+                            i.enumerable = i.enumerable || !1, i.configurable = !0, "value" in i && (i.writable = !0), Object.defineProperty(e, i.key, i)
+                        }
+                    }
+                    return function(e, t, n) {
+                        return t && i(e.prototype, t), n && i(e, n), e
+                    }
+                }();
+
+            function i(e, t) {
+                if (!(e instanceof t)) throw new TypeError("Cannot call a class as a function")
+            }
+            var t = function() {
+                function n(e, t) {
+                    i(this, n), this.browser = e, this.config = t, this.options = this.browser.options, this.prefetched = new Set, this.eventTime = null, this.threshold = 1111, this.numOnHover = 0
+                }
+                return e(n, [{
+                    key: "init",
+                    value: function() {
+                        !this.browser.supportsLinkPrefetch() || this.browser.isDataSaverModeOn() || this.browser.isSlowConnection() || (this.regex = {
+                            excludeUris: RegExp(this.config.excludeUris, "i"),
+                            images: RegExp(".(" + this.config.imageExt + ")$", "i"),
+                            fileExt: RegExp(".(" + this.config.fileExt + ")$", "i")
+                        }, this._initListeners(this))
+                    }
+                }, {
+                    key: "_initListeners",
+                    value: function(e) {
+                        -1 < this.config.onHoverDelay && document.addEventListener("mouseover", e.listener.bind(e), e.listenerOptions), document.addEventListener("mousedown", e.listener.bind(e), e.listenerOptions), document.addEventListener("touchstart", e.listener.bind(e), e.listenerOptions)
+                    }
+                }, {
+                    key: "listener",
+                    value: function(e) {
+                        var t = e.target.closest("a"),
+                            n = this._prepareUrl(t);
+                        if (null !== n) switch (e.type) {
+                            case "mousedown":
+                            case "touchstart":
+                                this._addPrefetchLink(n);
+                                break;
+                            case "mouseover":
+                                this._earlyPrefetch(t, n, "mouseout")
+                        }
+                    }
+                }, {
+                    key: "_earlyPrefetch",
+                    value: function(t, e, n) {
+                        var i = this,
+                            r = setTimeout(function() {
+                                if (r = null, 0 === i.numOnHover) setTimeout(function() {
+                                    return i.numOnHover = 0
+                                }, 1e3);
+                                else if (i.numOnHover > i.config.rateThrottle) return;
+                                i.numOnHover++, i._addPrefetchLink(e)
+                            }, this.config.onHoverDelay);
+                        t.addEventListener(n, function e() {
+                            t.removeEventListener(n, e, {
+                                passive: !0
+                            }), null !== r && (clearTimeout(r), r = null)
+                        }, {
+                            passive: !0
+                        })
+                    }
+                }, {
+                    key: "_addPrefetchLink",
+                    value: function(i) {
+                        return this.prefetched.add(i.href), new Promise(function(e, t) {
+                            var n = document.createElement("link");
+                            n.rel = "prefetch", n.href = i.href, n.onload = e, n.onerror = t, document.head.appendChild(n)
+                        }).catch(function() {})
+                    }
+                }, {
+                    key: "_prepareUrl",
+                    value: function(e) {
+                        if (null === e || "object" !== (void 0 === e ? "undefined" : r(e)) || !1 in e || -1 === ["http:", "https:"].indexOf(e.protocol)) return null;
+                        var t = e.href.substring(0, this.config.siteUrl.length),
+                            n = this._getPathname(e.href, t),
+                            i = {
+                                original: e.href,
+                                protocol: e.protocol,
+                                origin: t,
+                                pathname: n,
+                                href: t + n
+                            };
+                        return this._isLinkOk(i) ? i : null
+                    }
+                }, {
+                    key: "_getPathname",
+                    value: function(e, t) {
+                        var n = t ? e.substring(this.config.siteUrl.length) : e;
+                        return n.startsWith("/") || (n = "/" + n), this._shouldAddTrailingSlash(n) ? n + "/" : n
+                    }
+                }, {
+                    key: "_shouldAddTrailingSlash",
+                    value: function(e) {
+                        return this.config.usesTrailingSlash && !e.endsWith("/") && !this.regex.fileExt.test(e)
+                    }
+                }, {
+                    key: "_isLinkOk",
+                    value: function(e) {
+                        return null !== e && "object" === (void 0 === e ? "undefined" : r(e)) && (!this.prefetched.has(e.href) && e.origin === this.config.siteUrl && -1 === e.href.indexOf("?") && -1 === e.href.indexOf("#") && !this.regex.excludeUris.test(e.href) && !this.regex.images.test(e.href))
+                    }
+                }], [{
+                    key: "run",
+                    value: function() {
+                        "undefined" != typeof RocketPreloadLinksConfig && new n(new RocketBrowserCompatibilityChecker({
+                            capture: !0,
+                            passive: !0
+                        }), RocketPreloadLinksConfig).init()
+                    }
+                }]), n
+            }();
+            t.run();
+        }());
+    </script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/plugins/woo-smart-wishlist/assets/libs/perfect-scrollbar/js/perfect-scrollbar.jquery.min.js?ver=2.9.3'
+        id='perfect-scrollbar-js' defer></script>
+    <script type='text/javascript' id='woosw-frontend-js-extra'>
+        /* <![CDATA[ */
+        var woosw_vars = {
+            "ajax_url": "https:\/\/wpbingosite.com\/wordpress\/florial\/wp-admin\/admin-ajax.php",
+            "menu_action": "open_popup",
+            "perfect_scrollbar": "yes",
+            "wishlist_url": "https:\/\/wpbingosite.com\/wordpress\/florial\/wishlist\/",
+            "button_action": "list",
+            "button_action_added": "popup",
+            "empty_confirm": "Are you sure? This cannot be undone.",
+            "copied_text": "Copied the wishlist link:",
+            "menu_text": "Wishlist",
+            "button_text": "Add to wishlist",
+            "button_text_added": "Browse wishlist"
+        };
+        /* ]]> */
+    </script>
+    <script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/cache/min/1/wordpress/florial/wp-content/plugins/woo-smart-wishlist/assets/js/frontend.js?ver=1640835999'
+        id='woosw-frontend-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/themes/florial/js/popper.min.js' id='popper-js'
+        defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/themes/florial/js/bootstrap.min.js' id='bootstrap-js'
+        defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/themes/florial/js/jquery.mmenu.all.min.js'
+        id='jquery-mmenu-all-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/themes/florial/js/slick.min.js' id='slick-js'
+        defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/themes/florial/js/instafeed.min.js' id='instafeed-js'
+        defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/themes/florial/js/jquery.countdown.min.js'
+        id='jquery-countdown-js' defer></script>
+    <script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/cache/min/1/wordpress/florial/wp-content/themes/florial/js/jquery.elevatezoom.js?ver=1640835999'
+        id='jquery-elevatezoom-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/plugins/woocommerce/assets/js/photoswipe/photoswipe.min.js?ver=4.1.1-wc.6.0.0'
+        id='photoswipe-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/plugins/woocommerce/assets/js/photoswipe/photoswipe-ui-default.min.js?ver=4.1.1-wc.6.0.0'
+        id='photoswipe-ui-default-js' defer></script>
+    <script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/cache/min/1/wordpress/florial/wp-content/themes/florial/js/jquery.circlestime.js?ver=1640835999'
+        id='jquery-circlestime-js' defer></script>
+    <script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/cache/min/1/wordpress/florial/wp-content/themes/florial/js/360imagerotate.js?ver=1640835999'
+        id='360imagerotate-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/themes/florial/js/sly.min.js' id='sly-js'
+        defer></script>
+    <script type='text/javascript' id='florial-script-js-extra'>
+        /* <![CDATA[ */
+        var florial_ajax = {
+            "ajaxurl": "https:\/\/wpbingosite.com\/wordpress\/florial\/wp-admin\/admin-ajax.php"
+        };
+        /* ]]> */
+    </script>
+    <script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/cache/min/1/wordpress/florial/wp-content/themes/florial/js/functions.js?ver=1640835999'
+        id='florial-script-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript' id='florial-script-js-after'>
+        window.addEventListener('DOMContentLoaded', function() {
+            jQuery(function($) {
+                "use strict";
+                $(document).on("click", ".plus, .minus", function() {
+                    var t = $(this).closest(".quantity").find(".qty"),
+                        a = parseFloat(t.val()),
+                        n = parseFloat(t.attr("max")),
+                        s = parseFloat(t.attr("min")),
+                        e = t.attr("step");
+                    a && "" !== a && "NaN" !== a || (a = 0), ("" === n || "NaN" === n) && (n = ""), ("" === s || "NaN" === s) && (s = 0), ("any" === e || "" === e || void 0 === e || "NaN" === parseFloat(e)) && (e = 1), $(this).is(".plus") ? t.val(n && (n == a || a > n) ? n : a + parseFloat(e)) : s && (s == a || s > a) ? t.val(s) : a > 0 && t.val(a - parseFloat(e)), t.trigger("change")
+                })
+            });
+        });
+    </script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-includes/js/underscore.min.js?ver=1.13.1' id='underscore-js'
+        defer></script>
+    <script type='text/javascript' id='wp-util-js-extra'>
+        /* <![CDATA[ */
+        var _wpUtilSettings = {
+            "ajax": {
+                "url": "\/wordpress\/florial\/wp-admin\/admin-ajax.php"
+            }
+        };
+        /* ]]> */
+    </script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-includes/js/wp-util.min.js?ver=5.8.2' id='wp-util-js'
+        defer></script>
+    <script type='text/javascript' id='wc-add-to-cart-variation-js-extra'>
+        /* <![CDATA[ */
+        var wc_add_to_cart_variation_params = {
+            "wc_ajax_url": "\/wordpress\/florial\/?wc-ajax=%%endpoint%%",
+            "i18n_no_matching_variations_text": "Sorry, no products matched your selection. Please choose a different combination.",
+            "i18n_make_a_selection_text": "Please select some product options before adding this product to your cart.",
+            "i18n_unavailable_text": "Sorry, this product is unavailable. Please choose a different combination."
+        };
+        /* ]]> */
+    </script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/plugins/woocommerce/assets/js/frontend/add-to-cart-variation.min.js?ver=6.0.0'
+        id='wc-add-to-cart-variation-js' defer></script>
+    <script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/cache/min/1/wordpress/florial/wp-content/plugins/variation-swatches-for-woocommerce/assets/js/frontend.js?ver=1640835999'
+        id='tawcvs-frontend-js' defer></script>
+    <script type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-includes/js/wp-embed.min.js?ver=5.8.2' id='wp-embed-js'
+        defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/plugins/elementor/assets/js/webpack.runtime.min.js?ver=3.5.3'
+        id='elementor-webpack-runtime-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/plugins/elementor/assets/js/frontend-modules.min.js?ver=3.5.3'
+        id='elementor-frontend-modules-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/plugins/elementor/assets/lib/waypoints/waypoints.min.js?ver=4.0.2'
+        id='elementor-waypoints-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/plugins/elementor/assets/lib/swiper/swiper.min.js?ver=5.3.6'
+        id='swiper-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/plugins/elementor/assets/lib/share-link/share-link.min.js?ver=3.5.3'
+        id='share-link-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/plugins/elementor/assets/lib/dialog/dialog.min.js?ver=4.9.0'
+        id='elementor-dialog-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript' id='elementor-frontend-js-before'>
+        var elementorFrontendConfig = {
+            "environmentMode": {
+                "edit": false,
+                "wpPreview": false,
+                "isScriptDebug": false
+            },
+            "i18n": {
+                "shareOnFacebook": "Share on Facebook",
+                "shareOnTwitter": "Share on Twitter",
+                "pinIt": "Pin it",
+                "download": "Download",
+                "downloadImage": "Download image",
+                "fullscreen": "Fullscreen",
+                "zoom": "Zoom",
+                "share": "Share",
+                "playVideo": "Play Video",
+                "previous": "Previous",
+                "next": "Next",
+                "close": "Close"
+            },
+            "is_rtl": false,
+            "breakpoints": {
+                "xs": 0,
+                "sm": 480,
+                "md": 768,
+                "lg": 1200,
+                "xl": 1440,
+                "xxl": 1600
+            },
+            "responsive": {
+                "breakpoints": {
+                    "mobile": {
+                        "label": "Mobile",
+                        "value": 767,
+                        "default_value": 767,
+                        "direction": "max",
+                        "is_enabled": true
+                    },
+                    "mobile_extra": {
+                        "label": "Mobile Extra",
+                        "value": 880,
+                        "default_value": 880,
+                        "direction": "max",
+                        "is_enabled": false
+                    },
+                    "tablet": {
+                        "label": "Tablet",
+                        "value": 1199,
+                        "default_value": 1024,
+                        "direction": "max",
+                        "is_enabled": true
+                    },
+                    "tablet_extra": {
+                        "label": "Tablet Extra",
+                        "value": 1200,
+                        "default_value": 1200,
+                        "direction": "max",
+                        "is_enabled": false
+                    },
+                    "laptop": {
+                        "label": "Laptop",
+                        "value": 1366,
+                        "default_value": 1366,
+                        "direction": "max",
+                        "is_enabled": false
+                    },
+                    "widescreen": {
+                        "label": "Widescreen",
+                        "value": 2400,
+                        "default_value": 2400,
+                        "direction": "min",
+                        "is_enabled": false
+                    }
+                }
+            },
+            "version": "3.5.3",
+            "is_static": false,
+            "experimentalFeatures": {
+                "e_import_export": true,
+                "e_hidden_wordpress_widgets": true,
+                "landing-pages": true,
+                "elements-color-picker": true,
+                "favorite-widgets": true,
+                "admin-top-bar": true
+            },
+            "urls": {
+                "assets": "https:\/\/wpbingosite.com\/wordpress\/florial\/wp-content\/plugins\/elementor\/assets\/"
+            },
+            "settings": {
+                "page": [],
+                "editorPreferences": []
+            },
+            "kit": {
+                "viewport_tablet": 1199,
+                "active_breakpoints": ["viewport_mobile", "viewport_tablet"],
+                "global_image_lightbox": "yes",
+                "lightbox_enable_counter": "yes",
+                "lightbox_enable_fullscreen": "yes",
+                "lightbox_enable_zoom": "yes",
+                "lightbox_enable_share": "yes",
+                "lightbox_title_src": "title",
+                "lightbox_description_src": "description"
+            },
+            "post": {
+                "id": 9601,
+                "title": "Florial%20%E2%80%93%20Flower%20Store%20WooCommerce%20WordPress%20Theme%20%E2%80%93%20Just%20another%20WordPress%20site",
+                "excerpt": "",
+                "featuredImage": false
+            }
+        };
+    </script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/plugins/elementor/assets/js/frontend.min.js?ver=3.5.3'
+        id='elementor-frontend-js' defer></script>
+    <script type="rocketlazyloadscript" data-rocket-type='text/javascript'
+        src='https://wpbingosite.com/wordpress/florial/wp-content/plugins/elementor/assets/js/preloaded-modules.min.js?ver=3.5.3'
+        id='preloaded-modules-js' defer></script>
+    <script>
+        window.lazyLoadOptions = {
+            elements_selector: "img[data-lazy-src],.rocket-lazyload,iframe[data-lazy-src]",
+            data_src: "lazy-src",
+            data_srcset: "lazy-srcset",
+            data_sizes: "lazy-sizes",
+            class_loading: "lazyloading",
+            class_loaded: "lazyloaded",
+            threshold: 300,
+            callback_loaded: function (element) {
+                if (element.tagName === "IFRAME" && element.dataset.rocketLazyload == "fitvidscompatible") {
+                    if (element.classList.contains("lazyloaded")) {
+                        if (typeof window.jQuery != "undefined") {
+                            if (jQuery.fn.fitVids) {
+                                jQuery(element).parent().fitVids()
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        window.addEventListener('LazyLoad::Initialized', function (e) {
+            var lazyLoadInstance = e.detail.instance;
+            if (window.MutationObserver) {
+                var observer = new MutationObserver(function (mutations) {
+                    var image_count = 0;
+                    var iframe_count = 0;
+                    var rocketlazy_count = 0;
+                    mutations.forEach(function (mutation) {
+                        for (var i = 0; i < mutation.addedNodes.length; i++) {
+                            if (typeof mutation.addedNodes[i].getElementsByTagName !== 'function') {
+                                continue
+                            }
+                            if (typeof mutation.addedNodes[i].getElementsByClassName !== 'function') {
+                                continue
+                            }
+                            images = mutation.addedNodes[i].getElementsByTagName('img');
+                            is_image = mutation.addedNodes[i].tagName == "IMG";
+                            iframes = mutation.addedNodes[i].getElementsByTagName('iframe');
+                            is_iframe = mutation.addedNodes[i].tagName == "IFRAME";
+                            rocket_lazy = mutation.addedNodes[i].getElementsByClassName('rocket-lazyload');
+                            image_count += images.length;
+                            iframe_count += iframes.length;
+                            rocketlazy_count += rocket_lazy.length;
+                            if (is_image) {
+                                image_count += 1
+                            }
+                            if (is_iframe) {
+                                iframe_count += 1
+                            }
+                        }
+                    });
+                    if (image_count > 0 || iframe_count > 0 || rocketlazy_count > 0) {
+                        lazyLoadInstance.update()
+                    }
+                });
+                var b = document.getElementsByTagName("body")[0];
+                var config = {
+                    childList: !0,
+                    subtree: !0
+                };
+                observer.observe(b, config)
+            }
+        }, !1)
+    </script>
+    <script data-no-minify="1" async
+        src="https://wpbingosite.com/wordpress/florial/wp-content/plugins/wp-rocket/assets/js/lazyload/17.5/lazyload.min.js"></script>
+    <script>
+        class RocketElementorAnimation {
+            constructor() {
+                this.deviceMode = document.createElement("span"), this.deviceMode.id = "elementor-device-mode", this.deviceMode.setAttribute("class", "elementor-screen-only"), document.body.appendChild(this.deviceMode)
+            }
+            _detectAnimations() {
+                let t = getComputedStyle(this.deviceMode, ":after").content.replace(/"/g, "");
+                this.animationSettingKeys = this._listAnimationSettingsKeys(t), document.querySelectorAll(".elementor-invisible[data-settings]").forEach(t => {
+                    const e = t.getBoundingClientRect();
+                    if (e.bottom >= 0 && e.top <= window.innerHeight) try {
+                        this._animateElement(t)
+                    } catch (t) { }
+                })
+            }
+            _animateElement(t) {
+                const e = JSON.parse(t.dataset.settings),
+                    i = e._animation_delay || e.animation_delay || 0,
+                    n = e[this.animationSettingKeys.find(t => e[t])];
+                if ("none" === n) return void t.classList.remove("elementor-invisible");
+                t.classList.remove(n), this.currentAnimation && t.classList.remove(this.currentAnimation), this.currentAnimation = n;
+                let s = setTimeout(() => {
+                    t.classList.remove("elementor-invisible"), t.classList.add("animated", n), this._removeAnimationSettings(t, e)
+                }, i);
+                window.addEventListener("rocket-startLoading", function () {
+                    clearTimeout(s)
+                })
+            }
+            _listAnimationSettingsKeys(t = "mobile") {
+                const e = [""];
+                switch (t) {
+                    case "mobile":
+                        e.unshift("_mobile");
+                    case "tablet":
+                        e.unshift("_tablet");
+                    case "desktop":
+                        e.unshift("_desktop")
+                }
+                const i = [];
+                return ["animation", "_animation"].forEach(t => {
+                    e.forEach(e => {
+                        i.push(t + e)
+                    })
+                }), i
+            }
+            _removeAnimationSettings(t, e) {
+                this._listAnimationSettingsKeys().forEach(t => delete e[t]), t.dataset.settings = JSON.stringify(e)
+            }
+            static run() {
+                const t = new RocketElementorAnimation;
+                requestAnimationFrame(t._detectAnimations.bind(t))
+            }
+        }
+        document.addEventListener("DOMContentLoaded", RocketElementorAnimation.run);
+    </script>
+</body>
+
+</html>
+<!-- This website is like a Rocket, isn't it? Performance optimized by WP Rocket. Learn more: https://wp-rocket.me - Debug: cached@1641414329 -->
