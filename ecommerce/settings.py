@@ -91,8 +91,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'ecommercedb',
-        'USER': 'ecommerce_admin',
-        'PASSWORD': 'testing123',
+        'USER': 'ecommerce',
+        'PASSWORD': 'password',
         'HOST': 'localhost',
         'PORT': '',
     }
